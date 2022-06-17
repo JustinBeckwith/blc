@@ -9,6 +9,7 @@ export enum LogLevel {
 export enum Format {
   TEXT,
   JSON,
+  JUNIT,
   CSV,
 }
 

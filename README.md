@@ -52,7 +52,7 @@ $ linkinator LOCATIONS [ --arguments ]
         Defaults to 'false'.
 
     --format, -f
-        Return the data in CSV or JSON format.
+        Return the data in CSV, JSON or JUNIT format.
 
     --help
         Show this command.
@@ -132,7 +132,7 @@ The `--skip` parameter will accept any regex! You can do more complex matching, 
 linkinator http://jbeckwith.com --skip '^(?!http://jbeckwith.com)'
 ```
 
-Maybe you're going to pipe the output to another program.  Use the `--format` option to get JSON or CSV!
+Maybe you're going to pipe the output to another program.  Use the `--format` option to get JSON, JUnit Report Format or CSV!
 
 ```sh
 linkinator ./docs --format CSV

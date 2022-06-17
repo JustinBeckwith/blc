@@ -8,6 +8,7 @@ import fs from 'fs';
 import {URL} from 'url';
 import {Flags, getConfig} from './config.js';
 import {Format, Logger, LogLevel} from './logger.js';
+import {createReport} from './junit-report.js';
 import {
   LinkChecker,
   LinkState,
@@ -46,7 +47,7 @@ const cli = meow(
           Defaults to 'false'.
 
       --format, -f
-          Return the data in CSV or JSON format.
+          Return the data in CSV, JSON or JUNIT format.
 
       --help
           Show this command.
@@ -219,6 +220,11 @@ async function main() {
   if (format === Format.JSON) {
     result.links = filteredResults;
     console.log(JSON.stringify(result, null, 2));
+    return;
+  } else if (format === Format.JUNIT) {
+    result.links = filteredResults;
+    const junitReport = createReport(result);
+    console.log(junitReport);
     return;
   } else if (format === Format.CSV) {
     result.links = filteredResults;
