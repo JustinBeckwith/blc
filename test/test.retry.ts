@@ -104,6 +104,56 @@ describe('retries', () => {
     scope.done();
   });
 
+  it('should retry 429s with invalid `s` suffix', async () => {
+    const scope = nock('http://fake.local')
+      .get('/')
+      .reply(429, undefined, {
+        'retry-after': '3s',
+      })
+      .get('/')
+      .reply(200);
+
+    const {promise, resolve} = invertedPromise();
+    const checker = new LinkChecker().on('retry', resolve);
+    const clock = sinon.useFakeTimers({
+      shouldAdvanceTime: true,
+    });
+    const checkPromise = checker.check({
+      path: 'test/fixtures/basic',
+      retry: true,
+    });
+    await promise;
+    await clock.tickAsync(3000);
+    const results = await checkPromise;
+    assert.ok(results.passed);
+    scope.done();
+  });
+
+  it('should retry 429s with invalid `1m1s` format', async () => {
+    const scope = nock('http://fake.local')
+      .get('/')
+      .reply(429, undefined, {
+        'retry-after': '1m1s',
+      })
+      .get('/')
+      .reply(200);
+
+    const {promise, resolve} = invertedPromise();
+    const checker = new LinkChecker().on('retry', resolve);
+    const clock = sinon.useFakeTimers({
+      shouldAdvanceTime: true,
+    });
+    const checkPromise = checker.check({
+      path: 'test/fixtures/basic',
+      retry: true,
+    });
+    await promise;
+    await clock.tickAsync(61000);
+    const results = await checkPromise;
+    assert.ok(results.passed);
+    scope.done();
+  });
+
   it('should detect requests to wait on the same host', async () => {
     const scope = nock('http://fake.local')
       .get('/1')

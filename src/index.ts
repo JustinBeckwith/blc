@@ -386,6 +386,22 @@ export class LinkChecker extends EventEmitter {
       }
     }
   }
+  // The `retry-after` header can come in either <seconds> or
+  // A specific date to go check.
+  private parseRetryAfter(retryAfterRaw: string): number {
+    let retryAfter = Number(retryAfterRaw) * 1000 + Date.now();
+    if (!isNaN(retryAfter)) return retryAfter;
+
+    retryAfter = Date.parse(retryAfterRaw);
+    if (!isNaN(retryAfter)) return retryAfter;
+
+    // handle invalid response in formats `1m30s` or `30s`
+    const matches = retryAfterRaw.match(/^(?:(\d+)m)?(\d+)s$/);
+    if (!matches) return NaN;
+    return (
+      (Number(matches[1] || 0) * 60 + Number(matches[2])) * 1000 + Date.now()
+    );
+  }
   /**
    * Check the incoming response for a `retry-after` header.  If present,
    * and if the status was an HTTP 429, calculate the date at which this
@@ -404,15 +420,8 @@ export class LinkChecker extends EventEmitter {
       return false;
     }
 
-    // The `retry-after` header can come in either <seconds> or
-    // A specific date to go check.
-    let retryAfter = Number(retryAfterRaw) * 1000 + Date.now();
-    if (isNaN(retryAfter)) {
-      retryAfter = Date.parse(retryAfterRaw);
-      if (isNaN(retryAfter)) {
-        return false;
-      }
-    }
+    const retryAfter = this.parseRetryAfter(retryAfterRaw);
+    if (isNaN(retryAfter)) return false;
 
     // check to see if there is already a request to wait for this host
     if (opts.delayCache.has(opts.url.host)) {
