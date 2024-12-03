@@ -609,4 +609,90 @@ describe('linkinator', () => {
 		assert.ok(results.passed);
 		scope.done();
 	});
+
+	it('should not filter any status codes by default', async () => {
+		const scope = nock('http://fake.local')
+			.head('/')
+			.reply(200)
+			.head('/forbidden')
+			.reply(403)
+			.head('/method-not-allowed')
+			.reply(405)
+			.head('/error')
+			.reply(500);
+
+		const results = await check({
+			path: 'test/fixtures/exclude-status/index.html',
+		});
+
+		assert.strictEqual(results.links.length, 5);
+		assert.deepStrictEqual(
+			results.links.map((link) => ({ url: link.url, status: link.status })),
+			[
+				{ url: 'test/fixtures/exclude-status/index.html', status: 200 },
+				{ url: 'http://fake.local/', status: 200 },
+				{ url: 'http://fake.local/forbidden', status: 403 },
+				{ url: 'http://fake.local/method-not-allowed', status: 405 },
+				{ url: 'http://fake.local/error', status: 500 },
+			],
+		);
+		scope.done();
+	});
+
+	it('should filter 403 status codes when specified', async () => {
+		const scope = nock('http://fake.local')
+			.head('/')
+			.reply(200)
+			.head('/forbidden')
+			.reply(403)
+			.head('/method-not-allowed')
+			.reply(405)
+			.head('/error')
+			.reply(500);
+
+		const results = await check({
+			path: 'test/fixtures/exclude-status/index.html',
+			excludeStatuses: [403],
+		});
+
+		assert.strictEqual(results.links.length, 4);
+		assert.deepStrictEqual(
+			results.links.map((link) => ({ url: link.url, status: link.status })),
+			[
+				{ url: 'test/fixtures/exclude-status/index.html', status: 200 },
+				{ url: 'http://fake.local/', status: 200 },
+				{ url: 'http://fake.local/method-not-allowed', status: 405 },
+				{ url: 'http://fake.local/error', status: 500 },
+			],
+		);
+		scope.done();
+	});
+
+	it('should filter 403 and 405 status codes when specified', async () => {
+		const scope = nock('http://fake.local')
+			.head('/')
+			.reply(200)
+			.head('/forbidden')
+			.reply(403)
+			.head('/method-not-allowed')
+			.reply(405)
+			.head('/error')
+			.reply(500);
+
+		const results = await check({
+			path: 'test/fixtures/exclude-status/index.html',
+			excludeStatuses: [403, 405],
+		});
+
+		assert.strictEqual(results.links.length, 3);
+		assert.deepStrictEqual(
+			results.links.map((link) => ({ url: link.url, status: link.status })),
+			[
+				{ url: 'test/fixtures/exclude-status/index.html', status: 200 },
+				{ url: 'http://fake.local/', status: 200 },
+				{ url: 'http://fake.local/error', status: 500 },
+			],
+		);
+		scope.done();
+	});
 });

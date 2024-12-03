@@ -312,6 +312,11 @@ export class LinkChecker extends EventEmitter {
 			shouldRecurse = isHtml(response);
 		}
 
+		// Check if the status code should be excluded
+		if (options.checkOptions.excludeStatuses?.includes(status)) {
+			return;
+		}
+
 		// If retryErrors is enabled, retry 5xx and 0 status (which indicates
 		// a network error likely occurred):
 		if (this.shouldRetryOnError(status, options)) {

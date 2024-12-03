@@ -83,6 +83,9 @@ const cli = meow(
           Override the default verbosity for this command. Available options are
           'debug', 'info', 'warning', 'error', and 'none'.  Defaults to 'warning'.
 
+      --exclude-statuses
+          Comma-separated list of HTTP status codes to exclude from the results.
+
     Examples
       $ linkinator docs/
       $ linkinator https://www.google.com
@@ -110,6 +113,7 @@ const cli = meow(
 			retryErrorsJitter: { type: 'number', default: 3000 },
 			urlRewriteSearch: { type: 'string' },
 			urlReWriteReplace: { type: 'string' },
+			excludeStatuses: { type: 'string' },
 		},
 		booleanDefault: undefined,
 	},
@@ -195,6 +199,9 @@ async function main() {
 		retryErrors: flags.retryErrors,
 		retryErrorsCount: Number(flags.retryErrorsCount),
 		retryErrorsJitter: Number(flags.retryErrorsJitter),
+		excludeStatuses: flags.excludeStatuses
+			? flags.excludeStatuses.split(',').map(Number)
+			: undefined,
 	};
 	if (flags.skip) {
 		if (typeof flags.skip === 'string') {

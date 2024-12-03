@@ -24,6 +24,7 @@ export type CheckOptions = {
 	retryErrorsJitter?: number;
 	urlRewriteExpressions?: UrlRewriteExpression[];
 	userAgent?: string;
+	excludeStatuses?: number[];
 };
 
 export type InternalCheckOptions = {
