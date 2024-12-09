@@ -78,4 +78,11 @@ describe('server', () => {
 		assert.strictEqual(response.status, 200);
 		assert.strictEqual(response.data, contents);
 	});
+
+	it('should properly redirect URLs that end with search params', async () => {
+		const url = `${rootUrl}?a=b`;
+		const response = await request({url});
+		assert.strictEqual(response.status, 200);
+		assert.strictEqual(response.data, contents);
+	});
 });

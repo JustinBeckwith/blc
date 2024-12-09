@@ -50,13 +50,16 @@ async function handleRequest(
 	root: string,
 	options: WebServerOptions,
 ) {
-	const url = new URL(request.url || '/', `http://localhost:${options.port}`);
-	const pathParts = url.pathname
+	const requestUrl = new URL(
+		request.url || '/',
+		`http://localhost:${options.port}`,
+	);
+	const pathParts = requestUrl.pathname
 		.split('/')
 		.filter(Boolean)
 		.map(decodeURIComponent);
 	const originalPath = path.join(root, ...pathParts);
-	if (url.pathname.endsWith('/')) {
+	if (requestUrl.pathname.endsWith('/')) {
 		pathParts.push('index.html');
 	}
 
@@ -74,12 +77,17 @@ async function handleRequest(
 		const stats = await fs.stat(localPath);
 		const isDirectory = stats.isDirectory();
 		if (isDirectory) {
+			const redirectUrl = new URL(requestUrl);
+			if (!redirectUrl.pathname.endsWith('/')) {
+				redirectUrl.pathname += '/';
+			}
+
 			// This means we got a path with no / at the end!
 			const document = "<html><body>Redirectin'</body></html>";
 			response.statusCode = 301;
 			response.setHeader('Content-Type', 'text/html; charset=UTF-8');
 			response.setHeader('Content-Length', Buffer.byteLength(document));
-			response.setHeader('Location', `${request.url}/`);
+			response.setHeader('Location', redirectUrl.href);
 			response.end(document);
 			return;
 		}
