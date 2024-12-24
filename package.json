@@ -27,7 +27,7 @@
 		"escape-html": "^1.0.3",
 		"gaxios": "^6.0.0",
 		"glob": "^10.3.10",
-		"htmlparser2": "^9.0.0",
+		"htmlparser2": "^10.0.0",
 		"marked": "^13.0.0",
 		"meow": "^13.0.0",
 		"mime": "^4.0.0",
