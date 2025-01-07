@@ -124,6 +124,27 @@ describe('cli', function () {
 		assert.ok(output.links);
 	});
 
+	it('should provide Markdown if asked nicely', async () => {
+		const response = await execa(node, [
+			linkinator,
+			'--format',
+			'md',
+			'test/fixtures/markdown/README.md',
+		]);
+		assert.match(
+			response.stdout,
+			/\| test\/fixtures\/markdown\/README.md \| 200 \| OK \|/,
+		);
+		assert.match(
+			response.stdout,
+			/\| URL \| Status \| State \| Parent \| Failure Details \|/,
+		);
+		assert.match(
+			response.stdout,
+			/\|-----|--------|-------|--------|-----------------|/,
+		);
+	});
+
 	it('should look for linkinator.config.json in the cwd', async () => {
 		const response = await execa(node, ['../../../build/src/cli.js', '.'], {
 			cwd: 'test/fixtures/defaultconfig',

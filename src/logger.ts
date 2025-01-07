@@ -10,6 +10,7 @@ export enum Format {
 	TEXT = 0,
 	JSON = 1,
 	CSV = 2,
+	MD = 3,
 }
 
 export class Logger {

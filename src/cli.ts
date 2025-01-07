@@ -36,7 +36,7 @@ const cli = meow(
           Defaults to 'false'.
 
       --format, -f
-          Return the data in CSV or JSON format.
+          Return the data in CSV, JSON, or MD (Markdown) format.
 
       --help
           Show this command.
@@ -234,6 +234,24 @@ async function main() {
 		return;
 	}
 
+	if (format === Format.MD) {
+		result.links = filteredResults;
+		// Output the results in Markdown table format
+		console.log('# Link Check Results\n');
+		console.log('| URL | Status | State | Parent | Failure Details |');
+		console.log('|-----|--------|-------|--------|-----------------|');
+		for (const link of result.links) {
+			const failureDetails =
+				link.failureDetails && verbosity <= LogLevel.DEBUG
+					? JSON.stringify(link.failureDetails).replace(/\|/g, '\\|')
+					: '';
+			console.log(
+				`| ${link.url} | ${link.status} | ${link.state} | ${link.parent || ''} | ${failureDetails} |`,
+			);
+		}
+		return;
+	}
+
 	// Build a collection scanned links, collated by the parent link used in
 	// the scan.  For example:
 	// {
@@ -366,9 +384,11 @@ function parseFormat(flags: Flags): Format {
 	}
 
 	flags.format = flags.format.toUpperCase();
-	const options = Object.values(Format);
+	const options = Object.values(Format).map((format) => format.toString());
 	if (!options.includes(flags.format)) {
-		throw new Error("Invalid flag: FORMAT must be 'TEXT', 'JSON', or 'CSV'.");
+		throw new Error(
+			"Invalid flag: FORMAT must be one of 'TEXT', 'JSON', 'CSV', or 'MD'.",
+		);
 	}
 
 	return Format[flags.format as keyof typeof Format];
